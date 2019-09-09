@@ -15,15 +15,10 @@ class Subject:
         self.label = label
         self.index = index
         self.matched_with = None
-        self._preferences = None
+        self.preferences = None
 
-    @property
-    def preferences(self):
-        return self._preferences
-
-    @preferences.setter
-    def preferences(self, new_value):
-        self._preferences = new_value
+    def get_preferred(self):
+        return self.preferences.pop(0)
 
     def __str__(self):
         return self.label + ' ' + str(self.index)
@@ -38,11 +33,24 @@ def read_preferences(filename):
             yield subject, preferences
 
 
-def gale_shapley(solicitors, receptors):
+def rematch(applicant, respondent):
+    if respondent.matched_with is None:
+        respondent.matched_with = applicant.index
+        applicant.matched_with = respondent.index
+        return
+    # logica para destruir parejas
+    return
+
+
+def gale_shapley(applicants, respondents):
     matches = []
-    while len(solicitors) != 0:
-        current_solicitor = solicitors.pop()
-        receptor_index = current_solicitor.get_preferred()
+    while len(applicants) != 0:
+        current_applicant = applicants.pop()
+        while current_applicant.matched_with is None:
+            respondent_index = current_applicant.get_preferred()
+            current_respondent = respondents[respondent_index]
+            rematch(current_applicant, respondent)
+
 
 
 if __name__ == "__main__":
