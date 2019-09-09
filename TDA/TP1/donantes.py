@@ -19,7 +19,7 @@ class Subject:
         self.preferences_by_partner = None
 
     def get_preferred(self):
-        return self.partners_by_preferences.pop(0)
+        return self.partners_by_preference.pop(0)
 
     def build_preferences_by_partner(self):
         self.preferences_by_partner = list(self.partners_by_preference)
@@ -30,7 +30,7 @@ class Subject:
         return self.preferences_by_partner[other.index]
 
     def __str__(self):
-        return self.label + ' ' + str(self.index)
+        return str(self.index + 1)
 
 
 def read_preferences(filename):
@@ -97,11 +97,13 @@ if __name__ == "__main__":
     for r in respondents:
         r.build_preferences_by_partner()
 
+    gale_shapley(applicants, respondents)
+
     matches = []
     for patient in patients:
         if patient.matched_with is not None:
             donor = patient.matched_with
-            matches.append(','.join((patient.index, donor.index)))
+            matches.append(','.join(map(str, (patient, donor))))
 
     with open('resultados.txt', 'w') as f:
         for match in matches:
