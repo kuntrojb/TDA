@@ -15,10 +15,19 @@ class Subject:
         self.label = label
         self.index = index
         self.matched_with = None
-        self.preferences = None
+        self.partners_by_preference = None
+        self.preferences_by_partner = None
 
     def get_preferred(self):
-        return self.preferences.pop(0)
+        return self.partners_by_preferences.pop(0)
+
+    def build_preferences_by_partner(self):
+        self.preferences_by_partner = list(self.partners_by_preference)
+        for i, partner in enum(self.partners_by_preference):
+            self.preferences_by_partner[partner] = i
+
+    def preference(self, other):
+        return self.preferences_by_partner[other.index]
 
     def __str__(self):
         return self.label + ' ' + str(self.index)
@@ -34,12 +43,17 @@ def read_preferences(filename):
 
 
 def rematch(applicant, respondent):
-    if respondent.matched_with is None:
-        respondent.matched_with = applicant.index
-        applicant.matched_with = respondent.index
+    a, r = applicant, respondent
+    if r.matched_with is None:
+        r.matched_with = applicant
+        a.matched_with = respondent
         return
-    # logica para destruir parejas
-    return
+    if r.preference(a) < r.preference(r.matched_with):
+        rejected = r.matched_with
+        r.matched_with = a
+        a.matched_with = r
+        return rejected
+    return None
 
 
 def gale_shapley(applicants, respondents):
@@ -72,5 +86,8 @@ if __name__ == "__main__":
 
     for donor_index, preferences in read_preferences('factibilidad.txt'):
         donors[donor_index].preferences = preferences
+
+
+
 
     gale_shapley(donors, patients)
