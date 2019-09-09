@@ -6,7 +6,6 @@ posible
 """
 
 import argparse
-
 import csv
 
 
@@ -34,6 +33,13 @@ class Subject:
 
 
 def read_preferences(filename):
+    """
+    Reads a file with preferences for a Subject
+    The format expected is as follows:
+    [subject index], [subjects on the other group ordered by preference]
+
+    Yields a subject index and a list of preferences
+    """
     with open(filename) as f:
         for row in csv.reader(f):
             # we need to substract 1 so the indexes start at 0
@@ -43,6 +49,13 @@ def read_preferences(filename):
 
 
 def rematch(applicant, respondent):
+    """
+    Produces a match between applicant and respondent  if possible.
+    If a match is broken and another applicant is rejected, it returns that
+    applicant.
+
+    It has side effects on applicant and respondent.
+    """
     a, r = applicant, respondent
     if r.matched_with is None:
         r.matched_with = applicant
@@ -57,6 +70,13 @@ def rematch(applicant, respondent):
 
 
 def gale_shapley(applicants, respondents):
+    """
+    Applies the gale shapley algorithm between applicants and respondents.
+    """
+
+    # Since we don't want to change the list that was given to us
+    applicants = list(applicants)
+
     while len(applicants) != 0:
         current_applicant = applicants.pop()
 
@@ -77,7 +97,6 @@ if __name__ == "__main__":
     parser.add_argument('solicitante', help='Solicitante puede ser "p" o "d"')
 
     # TODO: agregar mensajes de ayuda apropiados y chequear valores pertinentes
-
     args = parser.parse_args()
 
     donors = [Subject(i, label='donor') for i in range(args.donantes)]
