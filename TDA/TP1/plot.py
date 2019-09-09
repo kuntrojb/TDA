@@ -7,8 +7,8 @@ from scipy import optimize
 n, t = np.loadtxt('datos.txt', unpack=True)
 
 
-def n_squared(x, c, d, f):
-    return c * (x * x)
+def n_squared(x, c, d):
+    return c * (x * x) + d
 
 
 def nlogn(x, c):
@@ -18,11 +18,11 @@ def nlogn(x, c):
 n_squared_fit, cov = optimize.curve_fit(n_squared, n, t)
 t_n_squared_fit = n_squared(n, *n_squared_fit)
 
-plt.loglog(n, t, 'x', label='DFT',
+plt.loglog(n, t, 'x', label='Gale Shapley',
            basex=2, basey=2)
 
 # fitting
-plt.loglog(n_squared_fit, t_n_squared_fit,
+plt.loglog(n, t_n_squared_fit,
            basex=2, basey=2)
 
 plt.xlabel('tamaño del vector')
