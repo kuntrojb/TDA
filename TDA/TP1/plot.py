@@ -18,12 +18,17 @@ def nlogn(x, c):
 n_squared_fit, cov = optimize.curve_fit(n_squared, n, t)
 t_n_squared_fit = n_squared(n, *n_squared_fit)
 
-plt.loglog(n, t, 'x', label='Gale Shapley',
-           basex=2, basey=2)
+#plt.loglog(n, t, 'x', label='Gale Shapley',
+#           basex=2, basey=2)
 
 # fitting
-plt.loglog(n, t_n_squared_fit,
-           basex=2, basey=2)
+#plt.loglog(n, t_n_squared_fit,
+#           basex=2, basey=2)
+
+plt.plot(n, t, 'x', label='Gale Shapley')
+
+# fitting
+plt.plot(n, t_n_squared_fit)
 
 plt.xlabel('tamaño del vector')
 plt.ylabel('tiempo de ejecución (segundos)')

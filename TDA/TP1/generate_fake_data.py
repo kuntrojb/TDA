@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import csv
 import random
-import os
 import time
 
 from galeshapley import Subject, gale_shapley
 
-ns = [*map(int, np.logspace(1, 3.5, num=20))]
+ns = [100, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
 
 data = []
-
 
 
 for n in ns:
