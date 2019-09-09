@@ -15,6 +15,15 @@ class Subject:
         self.label = label
         self.index = index
         self.matched_with = None
+        self._preferences = None
+
+    @property
+    def preferences(self):
+        return self._preferences
+
+    @preferences.setter
+    def preferences(self, new_value):
+        self._preferences = new_value
 
     def __str__(self):
         return self.label + ' ' + str(self.index)
@@ -51,9 +60,9 @@ if __name__ == "__main__":
     patients = [Subject(i, label='patient') for i in range(args.pacientes)]
 
     for patient_index, preferences in read_preferences('compatibilidad.txt'):
-        patients[patient_index].set_preferences(preferences)
+        patients[patient_index].preferences = preferences
 
     for donor_index, preferences in read_preferences('factibilidad.txt'):
-        donors[donor_index].set_preferences(preferences)
+        donors[donor_index].preferences = preferences
 
     gale_shapley(donors, patients)
