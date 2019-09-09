@@ -23,7 +23,7 @@ class Subject:
 
     def build_preferences_by_partner(self):
         self.preferences_by_partner = list(self.partners_by_preference)
-        for i, partner in enum(self.partners_by_preference):
+        for i, partner in enumerate(self.partners_by_preference):
             self.preferences_by_partner[partner] = i
 
     def preference(self, other):
@@ -57,14 +57,16 @@ def rematch(applicant, respondent):
 
 
 def gale_shapley(applicants, respondents):
-    matches = []
     while len(applicants) != 0:
         current_applicant = applicants.pop()
-        while current_applicant.matched_with is None:
-            respondent_index = current_applicant.get_preferred()
-            current_respondent = respondents[respondent_index]
-            rematch(current_applicant, respondent)
 
+        while current_applicant.matched_with is None:
+            current_respondent = respondents[current_applicant.get_preferred()]
+            rejected = rematch(current_applicant, current_respondent)
+
+            # if someone was rejected in the process
+            if rejected is not None:
+                applicants.append(rejected)
 
 
 if __name__ == "__main__":
@@ -82,12 +84,25 @@ if __name__ == "__main__":
     patients = [Subject(i, label='patient') for i in range(args.pacientes)]
 
     for patient_index, preferences in read_preferences('compatibilidad.txt'):
-        patients[patient_index].preferences = preferences
+        patients[patient_index].partners_by_preference = preferences
 
     for donor_index, preferences in read_preferences('factibilidad.txt'):
-        donors[donor_index].preferences = preferences
+        donors[donor_index].partners_by_preference = preferences
 
+    if args.solicitante == 'p':
+        applicants, respondents = patients, donors
+    else:
+        applicants, respondents = donors, patients
 
+    for r in respondents:
+        r.build_preferences_by_partner()
 
+    matches = []
+    for patient in patients:
+        if patient.matched_with is not None:
+            donor = patient.matched_with
+            matches.append(','.join((patient.index, donor.index)))
 
-    gale_shapley(donors, patients)
+    with open('resultados.txt', 'w') as f:
+        for match in matches:
+            f.write(match + '\n')
