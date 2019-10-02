@@ -1,55 +1,104 @@
 
-from compress import Character
-from functools import reduce
+
 from bitarray import bitarray
+from heap import Heap
 
+# Huffman tree implementation
+class Character:
 
-with open('mensaje.jpg', 'rb') as f:
-    byte_list = f.read()
+    BIT_0 = bitarray.from_number(0)
+    BIT_1 = bitarray.from_number(1)
 
-print('finished reading the file')
+    def __init__(self, label, weight, elemental=False):
+        self.weight = weight
+        self._label = label
+        self.left = None
+        self.right = None
 
-bset = set(byte_list)
-caracteres = [Character([a], byte_list.count(a), elemental=True) for a in bset]
+        # A character is elemental when it can't be decomposed into any more
+        # characters
+        self.elemental = elemental
 
-print('finished making the alphabet')
+    def __getitem__(self, bit):
+        if bit == 0:
+            return self.left
+        if bit == 1:
+            return self.right
+        raise Exception('Invalid item {}, valid items are 0 or 1'.format(bit))
 
-codigo = Character.build_tree(caracteres)
+    @property
+    def label(self):
+        if self.elemental:
+            return self._label[0]
+        return self._label
 
-print('finished making the code')
+    @classmethod
+    def build_tree(cls, character_list):
+        character_heap = Heap()
+        for character in character_list:
+            character_heap.insert(character)
+        while character_heap.size() > 1:
+            min_a, min_b = character_heap.pop(), character_heap.pop()
+            new_label = list(min_a.label)
+            new_label.extend(min_b.label)
+            new_weight = min_a.weight + min_b.weight
+            character_tree = cls(new_label, new_weight)
+            character_tree.left = min_a
+            character_tree.right = min_b
+            character_heap.insert(character_tree)
 
-codificado = bitarray()
-for a in byte_list:
-    codificado.extend(codigo.code(a))
+        # the first character of our heap is the new tree
+        return character_heap.pop()
 
-print('finished coding')
+    def decode_next(self, bit_array, index=0):
+        bit = bit_array[index]
+        subtree = self[bit]
+        if subtree.elemental:
+            return subtree.label, index + 1
+        return subtree.decode_next(bit_array, index=index + 1)
 
-index = 0
-cadena = bytearray()
+    def decode(self, bit_array):
+        decoded, index = "", 0
+        while index < len(bit_array):
+            c, index = self.decode_next(bit_array, index)
+            decoded += c
+        return decoded
 
-copia_codificado = bitarray()
-copia_codificado.extend(codificado)
+    def __lt__(self, other):
+        return self.weight < other.weight
 
-while index < len(codificado):
-    # want to make it faster
-    if index > 64:
-        codificado.throw(64)
-        index -= 64
-    c, index = codigo.decode(codificado, index)
-    cadena.append(c)
+    def __le__(self, other):
+        return self.weight <= other.weight
 
-print('finished decoding')
+    def __eq__(self, other):
+        return self.weight == other.weight
 
-codificado = bitarray()
-codificado.extend(copia_codificado)
+    def __ne__(self, other):
+        return self.weight != other.weight
 
-bytes_comprimido = (len(codificado) + 7) // 8
-bytes_sin_comprimir = len(byte_list)
-ratio = 100 * (bytes_comprimido / bytes_sin_comprimir)
-print('Comprimido {:d}'.format(bytes_comprimido))
-print('Sin comprimir {:d}'.format(bytes_sin_comprimir))
-print('Compresion {:4.2f}%'.format(ratio))
-print('finished decoding')
+    def __gt__(self, other):
+        return self.weight > other.weight
 
-with open('resultado.txt', 'wb') as f:
-    f.write(cadena)
+    def __ge__(self, other):
+        return self.weight >= other.weight
+
+    def direction(self, c):
+        if c in self.left.label:
+            return 0
+        elif c in self.right.label:
+            return 1
+        else:
+            raise Exception
+
+    def code(self, c):
+        if c not in self.label:
+            raise Exception
+        if self.elemental:
+            return bitarray()
+        bit = self.direction(c)
+
+        return bitarray.from_number(bit) + self[bit].code(c)
+
+    def __repr__(self):
+        cadena = 'Character(' + self.label + ',' + str(self.weight) + ')'
+        return cadena

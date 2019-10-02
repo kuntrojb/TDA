@@ -1,4 +1,5 @@
 
+from math import ceil
 
 class bitarray:
 
@@ -22,6 +23,16 @@ class bitarray:
         mask = 1 << index
         bit = (self.number & mask) >> index
         return bit
+
+    def to_bytes(self):
+        # The format is as follows:
+        # uint32_t big endian with the total amount of bits of the message
+        # the bits of the message with the remaining bits of the last byte
+        # unspecified
+        length = self.length.to_bytes(length=4, byteorder='big')
+        bytes_necessary = ceil(self.length/8)
+        return length + self.number.to_bytes(length=bytes_necessary,
+                                             byteorder='big')
 
     def getslice(self, index):
         if index.start is None:

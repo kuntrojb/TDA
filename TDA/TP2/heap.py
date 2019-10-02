@@ -6,48 +6,46 @@ class Heap:
         self.elements = []
 
     def pop(self):
+
         if self.size() == 1:
             return self.elements.pop()
-        element = self.elements[0]
-        self.elements[0] = self.elements.pop()
+
+        top, leaf = self.elements[0], self.elements.pop()
+        self.elements[0] = leaf
         index = 0
         balanced = False
 
-        leaf = self.elements[0]
-
         while not balanced:
-            left_index = self.left_child_index(index)
-            right_index = self.right_child_index(index)
-            if left_index >= len(self.elements):
+            left, left_index = self.left_child(index, return_index=True)
+            right, right_index = self.right_child(index, return_index=True)
+
+            # if the original leaf is now actually a leaf, we are done
+            if left is None:
                 balanced = True
                 break
-            left = self.elements[left_index]
+
+            group = filter(lambda x: x is not None, [leaf, right, left])
+            min_element = min(group)
 
             # TODO: reduce the if-else clauses
-            if right_index < len(self.elements):
-                right = self.elements[right_index]
-                if leaf == min(left, right, leaf):
-                    balanced = True
-                elif left == min(left, right, leaf):
-                    self.elements[index] = left
-                    self.elements[left_index] = leaf
-                    index = left_index
-                elif right == min(left, right, leaf):
-                    self.elements[index] = right
-                    self.elements[right_index] = leaf
-                    index = right_index
-            else:
-                if leaf == min(left, leaf):
-                    balanced = True
-                elif left == min(left, leaf):
-                    self.elements[index] = left
-                    self.elements[left_index] = leaf
-                    index = left_index
-        return element
+            if leaf == min_element:
+                balanced = True
+                break
+            elif left == min_element:
+                self.elements[index] = left
+                self.elements[left_index] = leaf
+                index = left_index
+            elif right == min_element:
+                self.elements[index] = right
+                self.elements[right_index] = leaf
+                index = right_index
+
+        return top
 
     def insert(self, element):
         self.elements.append(element)
         index = len(self.elements) - 1
+
         balanced = False
         while not balanced:
             parent_index = self.parent_index(index)
@@ -62,11 +60,19 @@ class Heap:
     def size(self):
         return len(self.elements)
 
-    def left_child_index(self, index):
-        return 2 * index + 1
+    def __getitem__(self, index, return_index=False):
+        val = None
+        if index < self.size():
+            val = self.elements[index]
+        if return_index:
+                return val, index
+        return val
 
-    def right_child_index(self, index):
-        return 2 * index + 2
+    def left_child(self, index, return_index=False):
+        return self.__getitem__(2 * index + 1, return_index)
+
+    def right_child(self, index, return_index=False):
+        return self.__getitem__(2 * index + 2, return_index)
 
     def parent_index(self, index):
         return (index - 1) // 2
