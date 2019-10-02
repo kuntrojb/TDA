@@ -4,6 +4,8 @@ from bitarray import bitarray
 from heap import Heap
 from math import ceil
 
+ARCH_BITS = 64
+
 # Huffman tree implementation
 class Character:
 
@@ -75,6 +77,12 @@ class Character:
         while index < len(bit_array):
             c, index = self.decode_next(bit_array, index)
             decoded += c
+            # throw away the bits we don't need
+            # this makes the decoding faster
+            if index > ARCH_BITS:
+                bit_array.throw(ARCH_BITS)
+                index -= ARCH_BITS
+
         return decoded
 
     def __lt__(self, other):
