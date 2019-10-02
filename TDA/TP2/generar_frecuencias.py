@@ -9,7 +9,7 @@ import random
 printable_start_index, printable_stop_index = 32, 126
 printable_count = printable_stop_index - printable_start_index + 1
 
-freqs = sorted(map(int, np.random.lognormal(mean=0.0, sigma=1.0, size=256)*100),
+freqs = sorted(map(int, np.random.lognormal(mean=0.0, sigma=1.5, size=256)*100),
                reverse=True)
 printable_freqs = freqs[:printable_count]
 non_printable_freqs =  freqs[printable_count + 1:]

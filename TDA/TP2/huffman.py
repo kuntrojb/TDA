@@ -2,6 +2,7 @@
 
 from bitarray import bitarray
 from heap import Heap
+from math import ceil
 
 # Huffman tree implementation
 class Character:
@@ -12,25 +13,36 @@ class Character:
 
     def __init__(self, label, weight, elemental=False):
         self.weight = weight
-        self._label = list(label)
+        if isinstance(label, set):
+            self._label = label
+        else:
+            self._label = {label}
         self.left = None
         self.right = None
 
         # A character is elemental when it can't be decomposed into any more
         # characters
         self.elemental = elemental
+        if self.elemental:
+            if isinstance(label, bytearray) or isinstance(label, str):
+                self.value = label
+            elif isinstance(label, int):
+                byte_length = ceil(label.bit_length()/8)
+                self.value = label.to_bytes(length=byte_length, byteorder='big')
+            else:
+                raise ValueError('Unsupported label type {}'.format(type(label)))
 
     def __getitem__(self, bit):
-        if bit is Character.BIT_0:
+        if bit is Character.BIT_0 or bit is 0:
             return self.left
-        if bit is Character.BIT_1:
+        if bit is Character.BIT_1 or bit is 1:
             return self.right
         raise Exception('Invalid item {}'.format(bit))
 
     @property
     def label(self):
         if self.elemental:
-            return self._label[0]
+            return self.value
         return self._label
 
     @classmethod
@@ -41,7 +53,7 @@ class Character:
         while character_heap.size() > 1:
             min_a = character_heap.pop()
             min_b = character_heap.pop()
-            new_label = min_a._label + min_b._label
+            new_label = min_a._label | min_b._label
             new_weight = min_a.weight + min_b.weight
             character_tree = cls(new_label, new_weight)
             character_tree.left = min_a
@@ -59,7 +71,7 @@ class Character:
         return subtree.decode_next(bit_array, index=index + 1)
 
     def decode(self, bit_array):
-        decoded, index = "", 0
+        decoded, index = self.decode_next(bit_array, 0)
         while index < len(bit_array):
             c, index = self.decode_next(bit_array, index)
             decoded += c
@@ -84,21 +96,19 @@ class Character:
         return self.weight >= other.weight
 
     def direction(self, c):
-        if c in self.left.label:
+        if c in self.left._label:
             return Character.BIT_0
-        elif c in self.right.label:
+        elif c in self.right._label:
             return Character.BIT_1
         else:
             raise Exception
 
     def code(self, c):
-        if c not in self.label:
-            raise Exception
         if self.elemental:
             return Character.EMPTY
         bit = self.direction(c)
         return bit + self[bit].code(c)
 
     def __repr__(self):
-        cadena = 'Character(' + self.label + ',' + str(self.weight) + ')'
+        cadena = 'Character(\'' + ''.join(self.label) + '\',' + str(self.weight) + ')'
         return cadena

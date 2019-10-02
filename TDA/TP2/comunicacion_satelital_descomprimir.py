@@ -13,14 +13,13 @@ import argparse
 import csv
 from huffman import Character
 from bitarray import bitarray
-
-ASCII_SIZE = 256
+import struct
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument('frecuencias', type=str, help='Archivo de frecuencias')
-    parser.add_argument('mensaje', type=str, help='Archivo a codificar')
+    parser.add_argument('mensaje', type=str, help='Archivo a decodificar')
     parser.add_argument('generado', help='Archivo generado')
 
     args = parser.parse_args()
@@ -41,15 +40,12 @@ if __name__ == "__main__":
 
     huffman_tree = Character.build_tree(character_list)
 
-    # Read the message to compress
     with open(args.mensaje, 'rb') as f:
-        message = f.read()
+        bit_length = int.from_bytes(f.read(4), byteorder='big')
+        number = int.from_bytes(f.read(), byteorder='big')
+        message = bitarray(bit_length, number)
 
-    # Compress the message
-    coded = bitarray()
-    for character in message:
-        coded.extend(huffman_tree.code(character))
+    decoded = huffman_tree.decode(message)
 
     with open(args.generado, 'wb') as f:
-        coded_binary_data = coded.to_bytes()
-        f.write(coded_binary_data)
+        f.write(decoded)

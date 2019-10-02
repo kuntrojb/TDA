@@ -3,9 +3,9 @@ from math import ceil
 
 class bitarray:
 
-    def __init__(self):
-        self.length = 0
-        self.number = 0
+    def __init__(self, length=0, number=0):
+        self.length = length
+        self.number = number
 
     def append(self, bit):
         if bit != 0 and bit != 1:
@@ -18,7 +18,7 @@ class bitarray:
         if isinstance(index, slice):
             return self.getslice(index)
         if self.length <= index or index <= -self.length:
-            raise IndexError
+            raise IndexError('Index was {} but the array has {} elements'.format(index, self.length))
         index = index % self.length
         mask = 1 << index
         bit = (self.number & mask) >> index
@@ -31,8 +31,9 @@ class bitarray:
         # unspecified
         length = self.length.to_bytes(length=4, byteorder='big')
         bytes_necessary = ceil(self.length/8)
-        return length + self.number.to_bytes(length=bytes_necessary,
-                                             byteorder='big')
+        coded_in_bytes = self.number.to_bytes(length=bytes_necessary,
+                                              byteorder='big')
+        return length + coded_in_bytes
 
     def getslice(self, index):
         if index.start is None:
@@ -84,7 +85,7 @@ class bitarray:
         if bit != 0 and bit != 1:
             raise ValueError('A bit can\'t be different from 0 or 1')
         if self.length <= index or index <= -self.length:
-            raise IndexError
+            raise IndexError('Index was {} but the array has {} elements'.format(index, self.length))
         index = index % self.length
         mask = 1 << index
         self.number &= ~mask
