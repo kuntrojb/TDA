@@ -16,21 +16,23 @@ def nlogn(x, c):
 
 
 n_squared_fit, cov = optimize.curve_fit(n_squared, n, t)
-t_n_squared_fit = n_squared(n, *n_squared_fit)
+n2 = np.linspace(min(n), max(n), 50)
+t_n_squared_fit = n_squared(n2, *n_squared_fit)
 
-#plt.loglog(n, t, 'x', label='Gale Shapley',
-#           basex=2, basey=2)
 
-# fitting
-#plt.loglog(n, t_n_squared_fit,
-#           basex=2, basey=2)
-
-plt.plot(n, t, 'x', label='Gale Shapley')
+plt.loglog(n, t, 'x', label='Resultado de la ejecucción',
+           basex=2, basey=2)
 
 # fitting
-plt.plot(n, t_n_squared_fit)
+plt.loglog(n2, t_n_squared_fit, label='$O(n^2)$',
+           basex=2, basey=2)
 
-plt.xlabel('tamaño del vector')
+#plt.plot(n, t, 'x', label='Gale Shapley')
+
+# fitting
+#plt.plot(n, t_n_squared_fit)
+
+plt.xlabel('Cantidad de solicitantes')
 plt.ylabel('tiempo de ejecución (segundos)')
 plt.legend()
 plt.savefig('tiempos.png')

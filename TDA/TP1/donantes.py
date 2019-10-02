@@ -3,6 +3,8 @@
 """
 Este programa se encarga de asociar donantes con pacientes de la mejor forma
 posible
+
+$./donantes.py [cantidad de pacientes] [cantidad de donantes] [pd]
 """
 
 import argparse
@@ -38,7 +40,6 @@ if __name__ == "__main__":
     parser.add_argument('donantes', type=int, help='Cantidad de donantes')
     parser.add_argument('solicitante', help='Solicitante puede ser "p" o "d"')
 
-    # TODO: agregar mensajes de ayuda apropiados y chequear valores pertinentes
     args = parser.parse_args()
 
     donors = [Subject(i, label='donor') for i in range(args.donantes)]
