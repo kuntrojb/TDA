@@ -23,8 +23,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    args.frecuencias = 'frecuencias.txt'
+    args.mensaje = 'mensaje.txt'
     with open(args.frecuencias, 'r') as f:
         freq_list = [*map(int, f.read().strip().split(','))]
+
     freqs = {}
     for i, f in enumerate(freq_list):
         freqs[chr(i)] = f
@@ -33,7 +36,7 @@ if __name__ == "__main__":
         message = f.read()
 
     character_list = []
-    for character in message:
+    for character in set(message):
         character_list.append(Character(label=character,
                                         weight=freqs[character],
                                         elemental=True))

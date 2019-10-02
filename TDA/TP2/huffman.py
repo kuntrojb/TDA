@@ -8,10 +8,11 @@ class Character:
 
     BIT_0 = bitarray.from_number(0)
     BIT_1 = bitarray.from_number(1)
+    EMPTY = bitarray()
 
     def __init__(self, label, weight, elemental=False):
         self.weight = weight
-        self._label = label
+        self._label = list(label)
         self.left = None
         self.right = None
 
@@ -20,11 +21,11 @@ class Character:
         self.elemental = elemental
 
     def __getitem__(self, bit):
-        if bit == 0:
+        if bit is Character.BIT_0:
             return self.left
-        if bit == 1:
+        if bit is Character.BIT_1:
             return self.right
-        raise Exception('Invalid item {}, valid items are 0 or 1'.format(bit))
+        raise Exception('Invalid item {}'.format(bit))
 
     @property
     def label(self):
@@ -38,9 +39,9 @@ class Character:
         for character in character_list:
             character_heap.insert(character)
         while character_heap.size() > 1:
-            min_a, min_b = character_heap.pop(), character_heap.pop()
-            new_label = list(min_a.label)
-            new_label.extend(min_b.label)
+            min_a = character_heap.pop()
+            min_b = character_heap.pop()
+            new_label = min_a._label + min_b._label
             new_weight = min_a.weight + min_b.weight
             character_tree = cls(new_label, new_weight)
             character_tree.left = min_a
@@ -84,9 +85,9 @@ class Character:
 
     def direction(self, c):
         if c in self.left.label:
-            return 0
+            return Character.BIT_0
         elif c in self.right.label:
-            return 1
+            return Character.BIT_1
         else:
             raise Exception
 
@@ -94,10 +95,9 @@ class Character:
         if c not in self.label:
             raise Exception
         if self.elemental:
-            return bitarray()
+            return Character.EMPTY
         bit = self.direction(c)
-
-        return bitarray.from_number(bit) + self[bit].code(c)
+        return bit + self[bit].code(c)
 
     def __repr__(self):
         cadena = 'Character(' + self.label + ',' + str(self.weight) + ')'
