@@ -34,6 +34,7 @@ class Character:
             else:
                 raise ValueError('Unsupported label type {}'.format(type(label)))
 
+
     def __getitem__(self, bit):
         if bit is Character.BIT_0 or bit is 0:
             return self.left
@@ -63,7 +64,9 @@ class Character:
             character_heap.insert(character_tree)
 
         # the first character of our heap is the new tree
-        return character_heap.pop()
+        tree = character_heap.pop()
+        tree.build_coding_table()
+        return tree
 
     def decode_next(self, bit_array, index=0):
         bit = bit_array[index]
@@ -111,11 +114,22 @@ class Character:
         else:
             raise Exception
 
-    def code(self, c):
+    def build_coding_table(self):
+        # build a table to know how to code each symbol
+
+        # each symbol is a byte and there's 256 possible bytes
+        self.table = [0]*256
+        for c in self.label:
+            self.table[c] = self._code(c)
+
+    def _code(self, c):
         if self.elemental:
             return Character.EMPTY
         bit = self.direction(c)
-        return bit + self[bit].code(c)
+        return bit + self[bit]._code(c)
+
+    def code(self, c):
+        return self.table[c]
 
     def __repr__(self):
         cadena = 'Character(\'' + ''.join(self.label) + '\',' + str(self.weight) + ')'

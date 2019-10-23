@@ -8,20 +8,26 @@ from matplotlib.backend_bases import MouseButton, MouseEvent, KeyEvent
 from collections import namedtuple
 from graham import GrahamScan
 from convex_hull_divide_and_conquer import DivideAndConquerHull
-from rectangulo_contenedor import BoundingBox
+from rectangulo_contenedor_inicial import BoundingBox
 
 from plot_utils import PlotData
 
 import math
 import time
 
-WAIT = 0.1
+WAIT = 0.05
+
+
+convex_hull = []
 
 def right_click_handler(event):
+    global convex_hull
+
     scan = GrahamScan(data)
     for step in scan.steps():
         scan.plot(ax, fig)
         time.sleep(WAIT)
+    convex_hull = list(scan.convex_hull)
 
 def divide_and_conquer_hull_handler(event):
     hull = DivideAndConquerHull(data)
@@ -33,7 +39,7 @@ def divide_and_conquer_hull_handler(event):
         time.sleep(WAIT)
 
 def bounding_box_handler(event):
-    box = BoundingBox(data)
+    box = BoundingBox(convex_hull)
     for step in box.steps():
         plot_data.clean_plot(which='lines')
         box.plot(ax, fig)
