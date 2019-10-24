@@ -1,5 +1,6 @@
 
-from vector import Point
+from collections import namedtuple
+Point = namedtuple('Point', ['x', 'y'])
 
 def graham_angle(p1, p2):
     ''' Not exactly the angle of the vector P₁P₂ but something that preserves
