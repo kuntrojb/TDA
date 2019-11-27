@@ -35,17 +35,29 @@ class BoundingBox:
         n = len(self.points)
         p = self.points
 
-        # four lines representing our caliper, going counterclockwise
-        top    = Vector.from_points(self.p_ymax, Point(self.p_ymax.x - 1, self.p_ymax.y))
-        bottom = Vector.from_points(self.p_ymin, Point(self.p_ymin.x + 1, self.p_ymin.y))
-        left   = Vector.from_points(self.p_xmin, Point(self.p_xmin.x, self.p_xmin.y + 1))
-        right  = Vector.from_points(self.p_xmax, Point(self.p_xmax.x, self.p_xmax.y - 1))
-
         # indexes for left, right, bottom and top lines
         il = self.points.index(self.p_xmin)
         ir = self.points.index(self.p_xmax)
         ib = self.points.index(self.p_ymin)
         it = self.points.index(self.p_ymax)
+
+        # four lines representing our caliper, going counterclockwise
+        top    = Vector.from_points(p[it], p[it] + Vector(-10,  0))
+        bottom = Vector.from_points(p[ib], p[ib] + Vector(+10,  0))
+        left   = Vector.from_points(p[il], p[il] + Vector( 0, -10))
+        right  = Vector.from_points(p[ir], p[ir] + Vector( 0, +10))
+
+        self.bl = left.intersection(bottom).point
+        self.br = bottom.intersection(right).point
+        self.tr = right.intersection(top).point
+        self.tl = top.intersection(left).point
+
+        self.top = top
+        self.bottom = bottom
+        self.left = left
+        self.right = right
+
+        yield False
 
         # whichever segment has the minimum angle goes next
         angle_left   = Vector.from_points(p[il], p[(il + 1) % n])@left
@@ -54,6 +66,12 @@ class BoundingBox:
         angle_bottom = Vector.from_points(p[ib], p[(ib + 1) % n])@bottom
 
         min_angle = min(angle_left, angle_right, angle_top, angle_bottom)
+
+        print('Angle left', angle_left)
+        print('Angle right', angle_right)
+        print('Angle top', angle_top)
+        print('Angle bottom', angle_bottom)
+        print(min_angle)
 
         left = left.rotate(min_angle)
         right = right.rotate(min_angle)
@@ -72,10 +90,17 @@ class BoundingBox:
         else:
             raise Exception('min function didn\'t return an expected minimum')
 
+        top.translate(p[it])
+        bottom.translate(p[ib])
+        left.translate(p[il])
+        right.translate(p[ir])
 
-        # rotating counterclockwise
-        a = angle(vector(top), vector(left))
+        self.bl = left.intersection(bottom).point
+        self.br = bottom.intersection(right).point
+        self.tr = right.intersection(top).point
+        self.tl = top.intersection(left).point
 
+        yield False
 
         yield True
 
@@ -86,9 +111,10 @@ class BoundingBox:
 
     def plot(self, axes, figure):
         ''' Plots our segments '''
+        bl, br, tr, tl = self.bl, self.br, self.tr, self.tl
+        self.points_to_plot = [bl, br, tr, tl, bl]
 
-        x0, y0, x1, y1 = self.x0, self.y0, self.x1, self.y1
-        p0, p1, p2, p3 = (x0, y0), (x1, y0), (x1, y1), (x0, y1)
-        self.points_to_plot = [p0, p1, p2, p3, p0]
         # Plot the whole thing
         axes.plot(*zip(*self.points_to_plot), 'C0')
+        for i in [self.top, self.bottom, self.left, self.right]:
+            axes.plot((i.origin.x, i.point.x), (i.origin.y, i.point.y), 'C1')

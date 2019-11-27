@@ -27,7 +27,7 @@ def right_click_handler(event):
     for step in scan.steps():
         scan.plot(ax, fig)
         time.sleep(WAIT)
-    convex_hull = list(scan.convex_hull)
+    convex_hull = list(scan.convex_hull[:-1])
 
 def divide_and_conquer_hull_handler(event):
     hull = DivideAndConquerHull(data)
@@ -45,11 +45,13 @@ def bounding_box_handler(event):
         box.plot(ax, fig)
         fig.canvas.draw()
         fig.canvas.flush_events()
-        time.sleep(WAIT)
+        time.sleep(WAIT*20)
 
 
 def plot_distance_in_points(p1, p2):
     x, y = abs(p1.x - p2.x), abs(p1.y - p2.y)
+    x /= plot_data.xlim[1] - plot_data.xlim[0]
+    y /= plot_data.ylim[1] - plot_data.ylim[0]
     x *= plot_data.width_in_points
     y *= plot_data.height_in_points
     return math.sqrt(x*x + y*y)

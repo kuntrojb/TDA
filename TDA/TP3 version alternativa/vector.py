@@ -37,6 +37,10 @@ class Vector:
     def norm(self):
         return math.sqrt(self * self)
 
+    @property
+    def point(self):
+        return Point(self.origin.x + self.x, self.origin.y + self.y)
+
     def __matmul__(self, other):
         ''' Returns the angle between two vectors '''
         return math.acos((self*other)/(self.norm*other.norm))
@@ -46,6 +50,9 @@ class Vector:
         y = self.y + other.y
 
         return Vector(x, y, self.origin)
+
+    def __radd__(self, other):
+        return self + other
 
     def __mul__(self, other):
         return self.x*other.x + self.y*other.y
@@ -62,7 +69,10 @@ class Vector:
 
         return self
 
+    def translate(self, point):
+        self.origin = point
+
     def intersection(self, other):
-        l1 = ((self.x, self.y), self.origin)
-        l2 = ((other.x, other.y), other.origin)
+        l1 = ((self.point.x, self.point.y), self.origin)
+        l2 = ((other.point.x, other.point.y), other.origin)
         return Vector._intersection(l1, l2)
